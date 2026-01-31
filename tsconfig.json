@@ -20,6 +20,44 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@app/common": [
+        "libs/common/src"
+      ],
+      "@app/common/*": [
+        "libs/common/src/*"
+      ],
+      "@app/paystack": [
+        "libs/paystack/src"
+      ],
+      "@app/paystack/*": [
+        "libs/paystack/src/*"
+      ],
+      "@app/address": [
+        "libs/address/src"
+      ],
+      "@app/address/*": [
+        "libs/address/src/*"
+      ],
+      "@app/wallet": [
+        "libs/wallet/src"
+      ],
+      "@app/wallet/*": [
+        "libs/wallet/src/*"
+      ],
+      "@app/shipment": [
+        "libs/shipment/src"
+      ],
+      "@app/shipment/*": [
+        "libs/shipment/src/*"
+      ],
+      "@app/rider": [
+        "libs/rider/src"
+      ],
+      "@app/rider/*": [
+        "libs/rider/src/*"
+      ]
+    }
   }
 }
