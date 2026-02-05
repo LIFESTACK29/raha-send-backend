@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: raha-send-backend
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build:backend
+    startCommand: npm run start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_DB_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+
+  - type: web
+    name: integration-service
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build:integration
+    startCommand: node dist/apps/integration/main
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_DB_URL
+        sync: false
