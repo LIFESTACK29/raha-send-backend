@@ -61,10 +61,10 @@ export class Address extends Document {
     @Prop({ default: true })
     is_residential: boolean;
 
-    @Prop({ type: Number })
+    @Prop({ type: Number, required: true })
     latitude: number;
 
-    @Prop({ type: Number })
+    @Prop({ type: Number, required: true })
     longitude: number;
 
     @Prop({ type: Object })

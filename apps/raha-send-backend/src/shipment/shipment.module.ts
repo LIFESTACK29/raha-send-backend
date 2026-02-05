@@ -6,5 +6,6 @@ import { AdminShipmentController } from './admin-shipment.controller';
 @Module({
     imports: [LibShipmentModule],
     controllers: [ShipmentController, AdminShipmentController],
+    exports: [LibShipmentModule],
 })
 export class ShipmentModule { }

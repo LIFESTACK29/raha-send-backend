@@ -5,7 +5,7 @@ import {
     IsNotEmpty,
     IsOptional,
     IsString,
-    Matches,
+    IsNumber,
 } from 'class-validator';
 
 export class CreateAddressDto {
@@ -79,4 +79,14 @@ export class CreateAddressDto {
     })
     @IsOptional()
     metadata?: any;
+
+    @ApiProperty({ example: 6.5244, description: 'Address latitude', required: true })
+    @IsNumber()
+    @IsNotEmpty()
+    latitude: number;
+
+    @ApiProperty({ example: 3.3792, description: 'Address longitude', required: true })
+    @IsNumber()
+    @IsNotEmpty()
+    longitude: number;
 }
