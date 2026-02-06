@@ -8,7 +8,7 @@ import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { Rider, IRider } from '@app/common';
 import { Vehicle, IVehicle } from './vehicle.schema';
-import { RiderLoginDto, CreateRiderDto, RiderResponseDto } from './rider.dto';
+import { RiderLoginDto, CreateRiderDto, RiderResponseDto, RiderSelfUpdateDto, AdminUpdateRiderDto } from './rider.dto';
 import { StorageService } from '../../storage/storage.service';
 
 @Injectable()
@@ -188,12 +188,82 @@ export class RiderService {
     };
   }
 
-  async updateRider(id: string, updates: any) {
+  async updateRider(id: string, updates: AdminUpdateRiderDto, profileImage?: Express.Multer.File) {
+    // Check for unique email if updating
+    if (updates.email) {
+      const existingEmail = await this.riderModel.findOne({ email: updates.email, _id: { $ne: id } });
+      if (existingEmail) {
+        throw new BadRequestException('A rider with this email already exists');
+      }
+    }
+
+    // Check for unique phone if updating
+    if (updates.phone) {
+      const existingPhone = await this.riderModel.findOne({ phone: updates.phone, _id: { $ne: id } });
+      if (existingPhone) {
+        throw new BadRequestException('A rider with this phone number already exists');
+      }
+    }
+
+    // Handle profile image upload if provided
+    let profileImageUrl: string | undefined;
+    if (profileImage) {
+      profileImageUrl = await this.storageService.upload(profileImage, 'riders/profiles');
+    }
+
+    const updateData = {
+      ...updates,
+      ...(profileImageUrl && { profileImage: profileImageUrl }),
+    };
+
     const rider = await this.riderModel
-      .findByIdAndUpdate(id, updates, { new: true })
+      .findByIdAndUpdate(id, updateData, { new: true })
       .select('-password');
     return {
       message: 'Rider updated successfully',
+      data: rider,
+    };
+  }
+
+  // Rider self-update: limited to email, phone, and profile image
+  async riderSelfUpdate(
+    riderId: string,
+    updates: RiderSelfUpdateDto,
+    profileImage?: Express.Multer.File,
+  ) {
+    // Check for unique email if updating
+    if (updates.email) {
+      const existingEmail = await this.riderModel.findOne({ email: updates.email, _id: { $ne: riderId } });
+      if (existingEmail) {
+        throw new BadRequestException('A rider with this email already exists');
+      }
+    }
+
+    // Check for unique phone if updating
+    if (updates.phone) {
+      const existingPhone = await this.riderModel.findOne({ phone: updates.phone, _id: { $ne: riderId } });
+      if (existingPhone) {
+        throw new BadRequestException('A rider with this phone number already exists');
+      }
+    }
+
+    // Handle profile image upload if provided
+    let profileImageUrl: string | undefined;
+    if (profileImage) {
+      profileImageUrl = await this.storageService.upload(profileImage, 'riders/profiles');
+    }
+
+    const updateData = {
+      ...updates,
+      ...(profileImageUrl && { profileImage: profileImageUrl }),
+    };
+
+    const rider = await this.riderModel
+      .findByIdAndUpdate(riderId, updateData, { new: true })
+      .select('-password')
+      .populate('vehicle');
+    return {
+      message: 'Profile updated successfully',
       data: rider,
     };
   }

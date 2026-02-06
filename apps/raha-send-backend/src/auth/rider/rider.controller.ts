@@ -2,12 +2,14 @@ import {
   Controller,
   Post,
   Get,
+  Patch,
   Body,
   UseGuards,
   Param,
   Request,
   UseInterceptors,
   UploadedFiles,
+  UploadedFile,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -16,9 +18,9 @@ import {
   ApiResponse,
   ApiConsumes,
 } from '@nestjs/swagger';
-import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { RiderService } from './rider.service';
-import { RiderLoginDto, CreateRiderDto, RiderResponseDto } from './rider.dto';
+import { RiderLoginDto, CreateRiderDto, RiderResponseDto, RiderSelfUpdateDto, AdminUpdateRiderDto } from './rider.dto';
 import { Anonymous } from '../../decorators/anonymous.decorator';
 import { AdminGuard } from '../guards/admin.guard';
 import { RiderGuard } from '../guards/rider.guard';
@@ -35,7 +37,10 @@ export class RiderController {
 
   @Post('login')
   @Anonymous()
-  @ApiOperation({ summary: 'Rider login' })
+  @ApiOperation({
+    summary: 'Rider login',
+    description: 'Authenticates a rider using email and password. Returns a JWT token for subsequent requests. Access: Public (no authentication required).',
+  })
   @ApiResponse({
     status: 200,
     description: 'Login successful, returns JWT token',
@@ -60,7 +65,10 @@ export class RiderController {
       { name: 'vehicle[carImages]', maxCount: 5 },
     ]),
   )
-  @ApiOperation({ summary: 'Create a new rider (Admin only)' })
+  @ApiOperation({
+    summary: 'Create a new rider (Admin only)',
+    description: 'Registers a new rider account with vehicle information. Access: Admin only. This endpoint generates a default password for the rider based on their name and phone number.',
+  })
   @ApiResponse({
     status: 201,
     description: 'Rider created successfully',
@@ -104,7 +112,10 @@ export class RiderController {
   @Get()
   @UseGuards(AdminGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get all riders (Admin only)' })
+  @ApiOperation({
+    summary: 'Get all riders (Admin only)',
+    description: 'Retrieves a list of all registered riders with their vehicle information. Access: Admin only.',
+  })
   @ApiResponse({
     status: 200,
     description: 'List of all riders',
@@ -116,7 +127,10 @@ export class RiderController {
   @Get(':id')
   @UseGuards(AdminGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get rider by ID (Admin only)' })
+  @ApiOperation({
+    summary: 'Get rider by ID (Admin only)',
+    description: 'Retrieves detailed information about a specific rider including vehicle details. Access: Admin only.',
+  })
   @ApiResponse({
     status: 200,
     description: 'Rider details',
@@ -128,7 +142,10 @@ export class RiderController {
   @Get('profile/me')
   @UseGuards(RiderGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get own profile (Rider only)' })
+  @ApiOperation({
+    summary: 'Get own profile (Rider only)',
+    description: 'Retrieves the authenticated rider\'s own profile information including vehicle details. Access: Rider only (authenticated).',
+  })
   @ApiResponse({
     status: 200,
     description: 'Your rider profile',
@@ -138,10 +155,57 @@ export class RiderController {
     return this.riderService.getRiderById(req.user.id);
   }
 
+  @Patch('profile/me')
+  @UseGuards(RiderGuard)
+  @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('profileImage'))
+  @ApiOperation({
+    summary: 'Update own profile (Rider only)',
+    description: 'Allows the authenticated rider to update their own email, phone number, and profile photo. Access: Rider only. Other fields cannot be modified by the rider.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Profile updated successfully',
+    type: RiderResponseDto,
+  })
+  async updateOwnProfile(
+    @Request() req,
+    @Body() updateDto: RiderSelfUpdateDto,
+    @UploadedFile() profileImage?: Express.Multer.File,
+  ) {
+    return this.riderService.riderSelfUpdate(req.user.id, updateDto, profileImage);
+  }
+
+  @Patch(':id')
+  @UseGuards(AdminGuard)
+  @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('profileImage'))
+  @ApiOperation({
+    summary: 'Update rider details (Admin only)',
+    description: 'Allows admin to update any rider\'s profile including name, date of birth, status, and ability to activate/deactivate accounts. Access: Admin only.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Rider updated successfully',
+    type: RiderResponseDto,
+  })
+  async updateRider(
+    @Param('id') id: string,
+    @Body() updateDto: AdminUpdateRiderDto,
+    @UploadedFile() profileImage?: Express.Multer.File,
+  ) {
+    return this.riderService.updateRider(id, updateDto, profileImage);
+  }
+
   @Get('jobs/me')
   @UseGuards(RiderGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get assigned shipments (Rider only)' })
+  @ApiOperation({
+    summary: 'Get assigned shipments (Rider only)',
+    description: 'Retrieves all shipments assigned to the authenticated rider. Access: Rider only.',
+  })
   async getMyJobs(@Request() req) {
     // Rider ID is available in req.user.id
     return this.shipmentService.findByRiderId(req.user.id);
@@ -150,7 +214,10 @@ export class RiderController {
   @Post('jobs/:id/status')
   @UseGuards(RiderGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update shipment status (Rider only)' })
+  @ApiOperation({
+    summary: 'Update shipment status (Rider only)',
+    description: 'Updates the status of an assigned shipment. Only the rider assigned to the shipment can update its status. Access: Rider only.',
+  })
   async updateStatus(
     @Request() req,
     @Param('id') shipmentId: string,

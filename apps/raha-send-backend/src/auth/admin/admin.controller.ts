@@ -13,11 +13,14 @@ import { AdminGuard } from '../guards/admin.guard';
 @ApiTags('Admin')
 @Controller('auth/admin')
 export class AdminController {
-  constructor(private adminService: AdminService) {}
+  constructor(private adminService: AdminService) { }
 
   @Post('register')
   @Anonymous()
-  @ApiOperation({ summary: 'Register a new admin' })
+  @ApiOperation({
+    summary: 'Register a new admin',
+    description: 'Creates a new admin account. Access: Public (for initial setup) - this should be restricted in production.',
+  })
   @ApiResponse({
     status: 201,
     description: 'Admin registered successfully',
@@ -29,7 +32,10 @@ export class AdminController {
 
   @Post('login')
   @Anonymous()
-  @ApiOperation({ summary: 'Admin login' })
+  @ApiOperation({
+    summary: 'Admin login',
+    description: 'Authenticates an admin using email and password. Returns a JWT token for subsequent requests. Access: Public (no authentication required).',
+  })
   @ApiResponse({
     status: 200,
     description: 'Login successful, returns JWT token',
@@ -46,7 +52,10 @@ export class AdminController {
   @Get()
   @UseGuards(AdminGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get all admins (Admin only)' })
+  @ApiOperation({
+    summary: 'Get all admins (Admin only)',
+    description: 'Retrieves a list of all registered admin accounts. Access: Admin only.',
+  })
   @ApiResponse({
     status: 200,
     description: 'List of all admins',
@@ -58,7 +67,10 @@ export class AdminController {
   @Get(':id')
   @UseGuards(AdminGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get admin by ID (Admin only)' })
+  @ApiOperation({
+    summary: 'Get admin by ID (Admin only)',
+    description: 'Retrieves detailed information about a specific admin account. Access: Admin only.',
+  })
   @ApiResponse({
     status: 200,
     description: 'Admin details',
