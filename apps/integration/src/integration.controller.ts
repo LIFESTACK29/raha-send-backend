@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Body,
   Param,
   Req,
@@ -13,6 +14,7 @@ import { ApiKeyGuard } from './guards/api-key.guard';
 import { AddressService } from '@app/address';
 import { ShipmentService } from '@app/shipment';
 import { CreateAddressDto } from '@app/address/dto/create-address.dto';
+import { UpdateAddressDto } from '@app/address/dto/update-address.dto';
 import { CreateParcelDto } from '@app/shipment/dto/create-parcel.dto';
 import { CreateShipmentDto, GetRateDto } from '@app/shipment/dto/create-shipment.dto';
 
@@ -34,15 +36,61 @@ export class IntegrationController {
 
   // Address Endpoints
   @Post('addresses')
-  @ApiOperation({ summary: 'Create Address' })
+  @ApiOperation({
+    summary: 'Create Address',
+    description: 'Creates a new address for the authenticated user. Access: API Key required.',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Address created successfully.',
+  })
   createAddress(@Req() req, @Body() dto: CreateAddressDto) {
     return this.addressService.create(dto);
   }
 
   @Get('addresses')
-  @ApiOperation({ summary: 'Get Addresses' })
+  @ApiOperation({
+    summary: 'Get all addresses',
+    description: 'Retrieves all addresses associated with the authenticated user. Access: API Key required.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Addresses retrieved successfully.',
+  })
   getAddresses(@Req() req) {
     return this.addressService.findAll();
+  }
+
+  @Get('addresses/:addressId')
+  @ApiOperation({
+    summary: 'Get address by ID',
+    description: 'Retrieves a specific address by its addressId. Access: API Key required.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Address retrieved successfully.',
+  })
+  @ApiResponse({ status: 404, description: 'Address not found.' })
+  getAddressById(@Req() req, @Param('addressId') addressId: string) {
+    return this.addressService.findOne(addressId);
+  }
+
+  @Patch('addresses/:addressId')
+  @ApiOperation({
+    summary: 'Update address',
+    description: 'Updates a specific address by its addressId. Access: API Key required.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Address updated successfully.',
+  })
+  @ApiResponse({ status: 404, description: 'Address not found.' })
+  updateAddress(
+    @Req() req,
+    @Param('addressId') addressId: string,
+    @Body() updateAddressDto: UpdateAddressDto,
+  ) {
+    return this.addressService.update(addressId, updateAddressDto);
   }
 
   // Shipment Endpoints
