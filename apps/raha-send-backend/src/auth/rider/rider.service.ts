@@ -275,4 +275,14 @@ export class RiderService {
       data: rider,
     };
   }
+
+  async updatePushToken(id: string, token: string, platform: 'ios' | 'android') {
+    await this.riderModel.findByIdAndUpdate(id, {
+      pushToken: token,
+      platform,
+    });
+    return {
+      message: 'Push token updated successfully',
+    };
+  }
 }

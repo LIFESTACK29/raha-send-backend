@@ -226,4 +226,19 @@ export class RiderController {
     // Pass riderId to verify assignment
     return this.shipmentService.updateStatus(shipmentId, status, req.user.id);
   }
+
+  @Post('push-token')
+  @UseGuards(RiderGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Update push token (Rider only)',
+    description: 'Updates the push notification token for the authenticated rider.',
+  })
+  async updatePushToken(
+    @Request() req,
+    @Body('token') token: string,
+    @Body('platform') platform: 'ios' | 'android',
+  ) {
+    return this.riderService.updatePushToken(req.user.id, token, platform);
+  }
 }

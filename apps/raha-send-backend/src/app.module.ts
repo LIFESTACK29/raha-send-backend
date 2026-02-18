@@ -15,6 +15,7 @@ import { UserModule } from './auth/user/user.module';
 import { WalletModule } from './wallet/wallet.module';
 import { AddressModule } from './address/address.module';
 import { ShipmentModule } from './shipment/shipment.module';
+import { NotificationModule } from './notifications/notification.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { ShipmentModule } from './shipment/shipment.module';
     WalletModule,
     AddressModule,
     ShipmentModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [

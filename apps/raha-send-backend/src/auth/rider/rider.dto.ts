@@ -132,6 +132,24 @@ export class RiderSelfUpdateDto {
   phone?: string;
 
   @ApiProperty({
+    example:'Firstname',
+    required:false,
+    description:'First name'
+  })
+  @IsString()
+  @IsOptional()
+  firstName?: string;
+
+  @ApiProperty({
+    example:'Lastname',
+    required:false,
+    description:'Last name'
+  })
+  @IsString()
+  @IsOptional()
+  lastName?: string;
+
+  @ApiProperty({
     type: 'string',
     format: 'binary',
     description: 'Profile photo upload (multipart/form-data)',

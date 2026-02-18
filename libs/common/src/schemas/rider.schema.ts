@@ -14,6 +14,8 @@ export interface IRider extends Document {
   vehicle: Types.ObjectId;
   isActive: boolean;
   role: string;
+  pushToken?: string;
+  platform?: string;
   createdBy: string;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
@@ -55,6 +57,12 @@ export class Rider extends Document {
 
   @Prop({ default: 'IDLE', enum: ['IDLE', 'BUSY', 'OFFLINE'] })
   status: string;
+
+  @Prop()
+  pushToken: string;
+
+  @Prop({ enum: ['ios', 'android'] })
+  platform: string;
 
   @Prop()
   createdBy: string;

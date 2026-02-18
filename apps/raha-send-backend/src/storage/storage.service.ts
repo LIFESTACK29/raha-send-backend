@@ -1,8 +1,6 @@
-import { S3Client } from '@aws-sdk/client-s3';
-import { Upload } from '@aws-sdk/lib-storage';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Readable } from 'stream';
 
 @Injectable()
 export class StorageService {
@@ -34,18 +32,15 @@ export class StorageService {
     }
 
     try {
-      const bufferStream = new Readable();
-      bufferStream.push(file.buffer);
-      bufferStream.push(null);
       const params = {
         Bucket: bucketName,
         Key: filePath,
-        Body: bufferStream,
+        Body: file.buffer,
         ContentType: file.mimetype,
         ACL: 'public-read' as const,
       };
-      const upload = new Upload({ params, client: this.client });
-      await upload.done();
+
+      await this.client.send(new PutObjectCommand(params));
 
       // Return the file URL
       // Note: Check if the region is part of the URL domain for your specific Scaleway setup
